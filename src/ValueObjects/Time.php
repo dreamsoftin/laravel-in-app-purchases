@@ -6,6 +6,7 @@ namespace Imdhemy\Purchases\ValueObjects;
 use Carbon\Carbon;
 use DateTime;
 use Imdhemy\AppStore\ValueObjects\Time as AppStoreTime;
+use Imdhemy\AppStore\V2\ValueObjects\Time as AppStoreTimeV2;
 use Imdhemy\GooglePlay\ValueObjects\Time as GoogleTime;
 
 final class Time
@@ -39,6 +40,15 @@ final class Time
      * @return static
      */
     public static function fromAppStoreTime(AppStoreTime $time): self
+    {
+        return self::fromCarbon($time->getCarbon());
+    }
+
+    /**
+     * @param AppStoreTime $time
+     * @return static
+     */
+    public static function fromAppStoreTimeV2(AppStoreTimeV2 $time): self
     {
         return self::fromCarbon($time->getCarbon());
     }

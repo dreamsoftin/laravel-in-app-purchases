@@ -3,24 +3,21 @@
 
 namespace Imdhemy\Purchases\Subscriptions;
 
-use Imdhemy\AppStore\ValueObjects\LatestReceiptInfo;
+use Imdhemy\AppStore\V2\ValueObjects\TransactionInfo;
 use Imdhemy\Purchases\Contracts\SubscriptionContract;
 use Imdhemy\Purchases\ValueObjects\Time;
 
-class AppStoreSubscription implements SubscriptionContract
+class AppStoreSubscriptionV2 implements SubscriptionContract
 {
-    /**
-     * @var ReceiptInfo
-     */
-    private $receipt;
+    private TransactionInfo $transactionInfo;
 
     /**
      * AppStoreSubscription constructor.
      * @param ReceiptInfo $receipt
      */
-    public function __construct(LatestReceiptInfo $receipt)
+    public function __construct(TransactionInfo $transactionInfo)
     {
-        $this->receipt = $receipt;
+        $this->transactionInfo = $transactionInfo;
     }
 
     /**
@@ -28,7 +25,7 @@ class AppStoreSubscription implements SubscriptionContract
      */
     public function getExpiryTime(): Time
     {
-        return Time::fromAppStoreTime($this->receipt->getExpiresDate());
+        return Time::fromAppStoreTimeV2($this->transactionInfo->getExpiresDate());
     }
 
     /**
@@ -36,7 +33,7 @@ class AppStoreSubscription implements SubscriptionContract
      */
     public function getItemId(): string
     {
-        return $this->receipt->getProductId();
+        return $this->transactionInfo->getProductId();
     }
 
     /**
@@ -52,7 +49,7 @@ class AppStoreSubscription implements SubscriptionContract
      */
     public function getUniqueIdentifier(): string
     {
-        return $this->receipt->getOriginalTransactionId();
+        return $this->transactionInfo->getOriginalTransactionId();
     }
 
     /**
@@ -60,6 +57,6 @@ class AppStoreSubscription implements SubscriptionContract
      */
     public function getProviderRepresentation()
     {
-        return $this->receipt;
+        return $this->transactionInfo;
     }
 }

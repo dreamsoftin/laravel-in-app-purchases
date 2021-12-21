@@ -5,12 +5,16 @@ namespace Imdhemy\Purchases\Http\Controllers;
 
 use Illuminate\Support\Facades\Log;
 use Imdhemy\AppStore\ServerNotifications\ServerNotification;
+use Imdhemy\AppStore\V2\ServerNotifications\ServerNotification as ServerNotificationV2;
 use Imdhemy\GooglePlay\DeveloperNotifications\DeveloperNotification;
 use Imdhemy\Purchases\Events\AppStore\EventFactory as AppStoreEventFactory;
+use Imdhemy\Purchases\Events\AppStoreV2\EventFactory as AppStoreEventFactoryV2;
 use Imdhemy\Purchases\Events\GooglePlay\EventFactory as GooglePlayEventFactory;
 use Imdhemy\Purchases\Http\Requests\AppStoreServerNotificationRequest;
+use Imdhemy\Purchases\Http\Requests\AppStoreServerNotificationRequestV2;
 use Imdhemy\Purchases\Http\Requests\GoogleDeveloperNotificationRequest;
 use Imdhemy\Purchases\ServerNotifications\AppStoreServerNotification;
+use Imdhemy\Purchases\ServerNotifications\AppStoreServerNotificationV2;
 use Imdhemy\Purchases\ServerNotifications\GoogleServerNotification;
 
 class ServerNotificationController extends Controller
@@ -22,7 +26,7 @@ class ServerNotificationController extends Controller
     {
         $data = $request->getData();
 
-        if (! $this->isParsable($data)) {
+        if (!$this->isParsable($data)) {
             Log::info(sprintf("Google Play malformed RTDN: %s", json_encode($request->all())));
 
             return;
@@ -60,6 +64,22 @@ class ServerNotificationController extends Controller
     }
 
     /**
+     * @param AppStoreServerNotificationRequest $request
+     */
+    public function appleV2(AppStoreServerNotificationRequestV2 $request)
+    {
+        $signedPayload = $request->signedPayload;
+        $notification = ServerNotificationV2::parseFromSignedJWS($signedPayload);
+        $appStoreServerNotification = new AppStoreServerNotificationV2($notification);
+
+        // dump($notification, "Appstore Event {$appStoreServerNotification->getType()}: ");
+        Log::info("Appstore Event {$appStoreServerNotification->getType()}", ['data' => print_r($notification, true)]);
+
+        $event = AppStoreEventFactoryV2::create($appStoreServerNotification);
+        event($event);
+    }
+
+    /**
      * @param string $data
      * @return bool
      */
@@ -67,6 +87,6 @@ class ServerNotificationController extends Controller
     {
         $decodedData = json_decode(base64_decode($data), true);
 
-        return ! is_null($decodedData);
+        return !is_null($decodedData);
     }
 }

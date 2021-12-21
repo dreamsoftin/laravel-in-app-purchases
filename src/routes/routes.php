@@ -12,3 +12,8 @@ Route::post(
     '/purchases/subscriptions/apple',
     [ServerNotificationController::class, 'apple']
 )->name('purchase.serverNotifications.apple');
+
+Route::post(
+    '/purchases/subscriptions/appleV2',
+    [ServerNotificationController::class, 'appleV2']
+)->name('purchase.serverNotifications.apple');
